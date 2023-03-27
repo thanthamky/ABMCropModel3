@@ -20,3 +20,11 @@ To simulate crop model,
              data = response.json()
              
 '''
+
+
+convert reponse data to pandas DaraFrame
+
+'''
+
+result = pd.DataFrame(json.loads(data['data']))
+'''
