@@ -2,7 +2,7 @@
 
 To simulate crop model,
 
-'''python
+```python
 
         import requests
 
@@ -19,7 +19,7 @@ To simulate crop model,
              response = requests.post(url_yield, params=params, files=file_data)
              data = response.json()
              
-'''
+```
 
 
 convert reponse data to pandas DaraFrame
