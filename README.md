@@ -24,13 +24,13 @@ with open('map_content.gz', 'rb') as file:
 
 convert reponse data to pandas DaraFrame
 
-```
+```python
 result = pd.DataFrame(json.loads(data['data']))
 ```
 
 
 To Re-Simulate Crop Model
-```
+```python
 url_sim = 'http://127.0.0.1:5001/crop_sim' # Max Process time about 10 min (Mac M1 pro)
 
 response = requests.get(url_sim, timeout=600)
