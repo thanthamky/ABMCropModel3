@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from array_compressor import compress_array, decompress_array, decompress_array_nodecode
 
-from agents_locator import convertAgentsMapToDataFrame
+from agents_locator import convertAgentsMapToDataFrame, convertAgentsMapToDataFrameBatch
 
 import rasterio
 
@@ -143,6 +143,64 @@ def crop_yield():
 
     
     agents = convertAgentsMapToDataFrame(map_data)
+    agents = getIrrigation(agents, './gis/irrigation_map.tif')
+    result = model.get_baseyield_1(agents)
+    result = model.vary_baseyield_2(result)
+    result = model.shock_temp_3(result, (15, 35))
+    result = model.shock_rain_4(result, (1800, 2200))
+    
+    if diss:
+        result = model.shock_disaster_5(result)
+        result = model.clean_agent_data(result, is_disaster=diss)
+    else:
+        result = model.clean_agent_data(result, is_disaster=diss)
+    
+    #data_prod = calculateCropProduct(result, ['ri1','ri2', 'ri3', 'ri4', 'mp','cf','op', 'sc','rb'], 'areas')
+
+    return jsonify({"status": "Success", "data":result.to_json()})
+
+@app.route('/crop_yield_batch', methods=['POST'])
+def crop_yield_batch():
+    print("CROP YEILD START....")
+    # RECEIVE ARGUMENTS
+    rain = request.args.get('rain')
+    temp = request.args.get('temp')
+    diss = request.args.get('diss')
+    ij   = request.args.get('ij')
+    shape = request.args.get('shape')
+    #data = request.get_json()['data']
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    file_content = file.read()
+
+    # CONVERT DATA
+    
+    ij = eval(ij)
+    shape = eval(shape)
+    print(shape)
+    i,j = ij[0], ij[1]
+    
+    data_dtype = 'int16'
+    data_shape = (shape[0], shape[1])
+
+    map_data = decompress_array_nodecode(file_content, dtype=data_dtype, shape=data_shape)
+    print(map_data.shape)
+
+    #print(file_content)
+
+    rain = eval(rain)
+    temp = eval(temp)
+    diss = eval(diss)
+
+    #map_data = decompress_array(data_map, dtype=data_dtype, shape=data_shape)
+
+    # PROCESS DATA ================================================================
+    
+    #agents = convertAgentsMapToDataFrame(map_data)
+    agents = convertAgentsMapToDataFrameBatch(map_data, i, j)
     agents = getIrrigation(agents, './gis/irrigation_map.tif')
     result = model.get_baseyield_1(agents)
     result = model.vary_baseyield_2(result)
