@@ -8,6 +8,7 @@ import rasterio
 from yield_module import CropModel
 
 import geopandas as gpd
+import pandas as pd
 
 # a function to generate all yield by latlon
 
@@ -102,7 +103,34 @@ def calculateCropYield(data, col_lat, col_lon):
             
     return filtered_data
         
+    
+def fix_missing_agent2(data, n_agent, id_col = 'ids'):
+    
+    data_columns = data.columns.tolist()
+    
+    data_dict = {}
+    
+    for col in data_columns:
         
+        data_dict[col] = []
+    
+    for agent_i in range(n_agent):
+        
+        if agent_i in data[id_col].tolist():
+            
+            for col in data_columns:
+                
+                data_dict[col].append(data[col][agent_i])
+            
+        else:
+            
+            data_dict[id_col].append(agent_i)
+            
+            for col in data_columns[1:]:
+                
+                data_dict[col].append(0.0)
+            
+    return pd.DataFrame(data_dict)    
 # ===========================================================================================================
     
     
@@ -113,6 +141,7 @@ def crop_yield():
     rain = request.args.get('rain')
     temp = request.args.get('temp')
     diss = request.args.get('diss')
+    n_agent = request.args.get('n_agent')
     #data = request.get_json()['data']
 
     if 'file' not in request.files:
@@ -135,6 +164,7 @@ def crop_yield():
     rain = eval(rain)
     temp = eval(temp)
     diss = eval(diss)
+    n_agent= eval(n_agent)
 
 
     #map_data = decompress_array(data_map, dtype=data_dtype, shape=data_shape)
@@ -146,14 +176,18 @@ def crop_yield():
     agents = getIrrigation(agents, './gis/irrigation_map.tif')
     result = model.get_baseyield_1(agents)
     result = model.vary_baseyield_2(result)
-    result = model.shock_temp_3(result, (15, 35))
-    result = model.shock_rain_4(result, (1800, 2200))
+    #result = model.shock_temp_3(result, (15, 35))
+    result = model.shock_temp_3(result, (temp[0], temp[1]))
+    #result = model.shock_rain_4(result, (1800, 2200))
+    result = model.shock_rain_4(result, (rain[0], rain[1]))
     
     if diss:
         result = model.shock_disaster_5(result)
         result = model.clean_agent_data(result, is_disaster=diss)
     else:
         result = model.clean_agent_data(result, is_disaster=diss)
+        
+    result = fix_missing_agent2(result, n_agent, id_col='ids')
     
     #data_prod = calculateCropProduct(result, ['ri1','ri2', 'ri3', 'ri4', 'mp','cf','op', 'sc','rb'], 'areas')
 
@@ -168,6 +202,7 @@ def crop_yield_batch():
     diss = request.args.get('diss')
     ij   = request.args.get('ij')
     shape = request.args.get('shape')
+    n_agent = request.args.get('n_agent')
     #data = request.get_json()['data']
 
     if 'file' not in request.files:
@@ -194,6 +229,7 @@ def crop_yield_batch():
     rain = eval(rain)
     temp = eval(temp)
     diss = eval(diss)
+    n_agent= eval(n_agent)
 
     #map_data = decompress_array(data_map, dtype=data_dtype, shape=data_shape)
 
@@ -204,14 +240,18 @@ def crop_yield_batch():
     agents = getIrrigation(agents, './gis/irrigation_map.tif')
     result = model.get_baseyield_1(agents)
     result = model.vary_baseyield_2(result)
-    result = model.shock_temp_3(result, (15, 35))
-    result = model.shock_rain_4(result, (1800, 2200))
+    #result = model.shock_temp_3(result, (15, 35))
+    result = model.shock_temp_3(result, (temp[0], temp[1]))
+    #result = model.shock_rain_4(result, (1800, 2200))
+    result = model.shock_rain_4(result, (rain[0], rain[1]))
     
     if diss:
         result = model.shock_disaster_5(result)
         result = model.clean_agent_data(result, is_disaster=diss)
     else:
         result = model.clean_agent_data(result, is_disaster=diss)
+        
+    result = fix_missing_agent2(result, n_agent, id_col='ids')
     
     #data_prod = calculateCropProduct(result, ['ri1','ri2', 'ri3', 'ri4', 'mp','cf','op', 'sc','rb'], 'areas')
 
