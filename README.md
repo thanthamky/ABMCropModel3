@@ -31,7 +31,6 @@ params = {
     'diss': "True",
     'ij':"[1000,3500]",
     'shape':"[500,500]",
-    'n_agent': "810",
 }
 
 #data = {'data': map_com}
