@@ -187,7 +187,7 @@ def crop_yield():
     else:
         result = model.clean_agent_data(result, is_disaster=diss)
         
-    result = fix_missing_agent2(result, n_agent, id_col='ids')
+    #result = fix_missing_agent2(result, n_agent, id_col='ids')
     
     #data_prod = calculateCropProduct(result, ['ri1','ri2', 'ri3', 'ri4', 'mp','cf','op', 'sc','rb'], 'areas')
 
@@ -251,7 +251,7 @@ def crop_yield_batch():
     else:
         result = model.clean_agent_data(result, is_disaster=diss)
         
-    result = fix_missing_agent2(result, n_agent, id_col='ids')
+    #result = fix_missing_agent2(result, n_agent, id_col='ids')
     
     #data_prod = calculateCropProduct(result, ['ri1','ri2', 'ri3', 'ri4', 'mp','cf','op', 'sc','rb'], 'areas')
 

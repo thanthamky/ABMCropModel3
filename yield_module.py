@@ -182,14 +182,25 @@ class CropModel:
     
     def clean_agent_data(self, agent_data, is_disaster):
         
+        # Deprecate code for optimizing 
+#         if not is_disaster:
+            
+#             output_columns = ['ids','areas','irri'] + ['ranshk_'+cropName for cropName in self.CropLabelName]
+#             clean_columns = ['ids','areas','irri'] + [cropName for cropName in self.CropLabelName]
+#         else:
+#             output_columns = ['ids','areas','irri'] + ['dis_'+cropName for cropName in self.CropLabelName] +\
+#                              ['dis_severity']
+#             clean_columns = ['ids','areas','irri'] + [cropName for cropName in self.CropLabelName] +\
+#                              ['severity']
+            
         if not is_disaster:
             
-            output_columns = ['ids','areas','irri'] + ['ranshk_'+cropName for cropName in self.CropLabelName]
-            clean_columns = ['ids','areas','irri'] + [cropName for cropName in self.CropLabelName]
+            output_columns = ['ids','irri'] + ['ranshk_'+cropName for cropName in self.CropLabelName]
+            clean_columns = ['ids','irri'] + [cropName for cropName in self.CropLabelName]
         else:
-            output_columns = ['ids','areas','irri'] + ['dis_'+cropName for cropName in self.CropLabelName] +\
+            output_columns = ['ids','irri'] + ['dis_'+cropName for cropName in self.CropLabelName] +\
                              ['dis_severity']
-            clean_columns = ['ids','areas','irri'] + [cropName for cropName in self.CropLabelName] +\
+            clean_columns = ['ids','irri'] + [cropName for cropName in self.CropLabelName] +\
                              ['severity']
         
         output_dataframe = agent_data[output_columns]
